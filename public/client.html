@@ -1,13 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 
 <head>
-    <title>Express</title>
+  <title>Microsoft Cognitive Services Demo</title>
+  <meta charset="utf-8" />
 </head>
 
 <body>
-    <h1>Express</h1>
-    <p>Welcome to Express</p>
+
+  <div id="content">
+    <h1 style="font-weight:500;">Microsoft Cognitive Services Speech</h1>
+    <h2>npm: microsoft-cognitiveservices-speech-sdk</h2>
+    <table width="100%">
+      <tr>
+        <td align="right">Your Speech Resource Key</td>
+        <td>
+          <input id="resourceKey" type="text" size="40" placeholder="Your resource key (32 characters)" value="45b41e7e6c3b445ba77330f1fe423c75">
+        </td>
+      </tr>
+      <tr>
+        <td align="right">Your Speech Resource region</td>
+        <td>
+          <input id="resourceRegion" type="text" size="40" placeholder="Your resource region" value="westeurope">
+        </td>
+      </tr>
+      <tr>
+        <td align="right">
+          Upload audio file
+        </td>
+        <td>
+          <input type="file" id="fileInput" accept=".mp3, .mp4, .wav" onchange="handleFileSelect(event)">
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td align="left">
+          <button id="transcribeButton" onclick="transcribeAudio()">Transcribe</button>
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <textarea id="transcriptionTextArea" rows="6" cols="50"></textarea>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Speech SDK reference sdk. -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script> -->
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
+  <!-- Speech SDK USAGE -->
+  <script>
+    // status fields and start button in UI
+    var resourceKey;
+    var resourceRegion;
+    var audioFile;
+
+    function handleFileSelect(event) {
+      audioFile = event.target.files[0];
+    }
+
+    function transcribeAudio() {
+      // Get the resource key and region from input fields
+      resourceKey = document.getElementById('resourceKey').value.trim();
+      resourceRegion = document.getElementById('resourceRegion').value.trim();
+
+      if (!audioFile) {
+        alert('Please select an audio file.');
+        return;
+      }
+
+      var speechConfig = SpeechSDK.SpeechConfig.fromSubscription(resourceKey, resourceRegion);
+      speechConfig.speechRecognitionLanguage = "de-DE";
+
+      var audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(audioFile);
+
+      var recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+      
+
+      recognizer.recognized = function (s, e) {
+        if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
+          var transcriptionTextArea = document.getElementById("transcriptionTextArea");
+          transcriptionTextArea.value = e.result.text;
+        }
+      };
+
+      recognizer.startContinuousRecognitionAsync();
+    }
+  </script>
 </body>
 
 </html>
